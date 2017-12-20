@@ -1,0 +1,3 @@
+aws s3 sync . s3://tax-law-comparison.apsquared.co --profile tvfoodmaps_aws
+from target dir:
+aws lambda update-function-code --function-name TaxCalculation --zip-file fileb://taxes-lambda-1.0-SNAPSHOT.jar --profile tvfoodmaps_aws

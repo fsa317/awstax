@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Tax and Job Act - What will you pay?</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <script type="text/javascript" src="lib/axios/dist/axios.standalone.js"></script>
+    <script type="text/javascript" src="lib/CryptoJS/rollups/hmac-sha256.js"></script>
+    <script type="text/javascript" src="lib/CryptoJS/rollups/sha256.js"></script>
+    <script type="text/javascript" src="lib/CryptoJS/components/hmac.js"></script>
+    <script type="text/javascript" src="lib/CryptoJS/components/enc-base64.js"></script>
+    <script type="text/javascript" src="lib/url-template/url-template.js"></script>
+    <script type="text/javascript" src="lib/apiGatewayCore/sigV4Client.js"></script>
+    <script type="text/javascript" src="lib/apiGatewayCore/apiGatewayClient.js"></script>
+    <script type="text/javascript" src="lib/apiGatewayCore/simpleHttpClient.js"></script>
+    <script type="text/javascript" src="lib/apiGatewayCore/utils.js"></script>
+    <script type="text/javascript" src="apigClient.js"></script>
+
+    <style>
+    .resultValue{
+      display: inline;
+      float:right;
+    }
+    </style>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+          <a class="navbar-brand" href="#"></a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+
+          <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+            <ul class="navbar-nav mr-auto">
+              <li class="nav-item active">
+                <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">About</a>
+              </li>
+            </ul>
+
+          </div>
+        </nav>
+
+        <main role="main">
+
+          <!-- Main jumbotron for a primary marketing message or call to action -->
+          <div class="jumbotron">
+            <div class="container">
+              <h1 class="display-3">2018 Tax Cuts and Jobs Act Comparison </h1>
+              <p>A major change to the US tax code has been enacted for 2018.  Given the complexity of the existing law and how
+              different income brackets and even different locations (due to SALT tax deductions) will be effected differently, it is very hard to determine how the bill will effect you.
+              Use the form below to get a VERY ROUGH idea on how it might effect you.
+              </p>
+              <div class="alert alert-warning" role="alert">
+                Warning:  This is not meant to provide ANY tax advice or even be 100% accurate.  It is a gross simplification
+                and estimate primarly to compare a before and after of the current bill.  It over simplifies many of the laws
+                that effect people at low (< 40k year) and high (> 1 million), and is more accurate inside this range.
+                <br/><br/>
+                The formulas used ignore a lot of factors including:  child tax credit, personal exemptions, pass through income and capital gains.
+                <br/>That said for many people this approximation is pretty decent at approximating the effect of new tax law.  It does account for tax rate differences, AMT changes and changes to deductions (SALT especially).
+             </div>
+            <a name="resAnchor"></a>
+            <div class="container">
+            <div class="row">
+            <div class="col-md-6">
+              <div class="card bg-light">
+                <div class="card-header">Fill this out...</div>
+                <div class="card-body">
+
+                <form>
+                  <div class="form-group">
+                    <label for="wages">Your Yearly wages</label>
+                    <input type="text" class="form-control" id="wages">
+                    <small id="emailHelp" class="form-text text-muted">This is your total wages before deductions.</small>
+                  </div>
+                  <div class="form-group">
+                    <label for="interest">Home Interest Paid</label>
+                    <input type="text" class="form-control" id="interest" placeholder="">
+                    <small id="emailHelp" class="form-text text-muted">The amount of home interest you paid. (Line 10 on your Schedule A)</small>
+                  </div>
+                  <div class="form-group">
+                    <label for="stateTaxes">State/Local Income Tax</label>
+                    <input type="text" class="form-control" id="stateTaxes" placeholder="">
+                    <small id="emailHelp" class="form-text text-muted">The amount of state tax you paid. (Line 5 on your Schedule A)</small>
+                  </div>
+                  <div class="form-group">
+                    <label for="propertyTaxes">Real Estate/Property Taxes</label>
+                    <input type="text" class="form-control" id="propertyTaxes" placeholder="">
+                    <small id="emailHelp" class="form-text text-muted">The amount of property tax you paid. (Line 6 on your Schedule A)</small>
+                  </div>
+                  <div class="form-group">
+                    <label for="otherDeductions">Misc Deductions</label>
+                    <input type="text" class="form-control" id="otherDeductions" placeholder="">
+                    <small id="emailHelp" class="form-text text-muted">Enter other deductions (such as charity).</small>
+                  </div>
+                  <div class="form-group">
+                    <label for="married">Married?</label>
+                    <select class="form-control" id="married">
+                    <option value="true">Married</option>
+                    <option value="false">Single</option>
+                  </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="postalCode">Postal Code</label>
+                    <input type="text" class="form-control" id="postalCode" placeholder="">
+                    <small id="emailHelp" class="form-text text-muted">Used for tracking which areas of the country are effected differently</small>
+                  </div>
+                </form>
+              <a id="subBtn" class="btn btn-primary btn-lg" href="#" role="button">Submit</a>
+              </div>
+            </div>
+          </div>
+
+              <div class="col-md-6">
+                <div class="card text-white bg-success">
+                <div class="card-header">Savings</div>
+                <div class="card-body">
+                  <h4 class="card-title">Details </h4>
+                  <p class="card-text">
+                    <div class="container" id="resultsDiv"><div class="row">
+                      <div class="col-md-6">
+                        2017<Br/>
+                        <span class="resultLabel">Deductions:</span>
+                        <div class="resultValue" id="deductions17"></div>
+                        <br/>
+                        <span class="resultLabel">Taxable Income:</span>
+                        <div class="resultValue" id="taxableIncome17"></div>
+                        <br/>
+                        <span class="resultLabel">Standard Tax:</span>
+                        <div class="resultValue" id="stdTax17"></div>
+                        <br/>
+                        <span class="resultLabel">AMT Liability:</span>
+                        <div class="resultValue" id="amt17"></div>
+                        <br/>
+                        <span class="resultLabel">Your Taxes:</span>
+                        <div class="resultValue" id="tax17"></div>
+                        <br/>
+                        <span class="resultLabel">Effective Rate:</span>
+                        <div class="resultValue" id="rate17"></div>
+                        <br/>
+                      </div>
+                      <div class="col-md-6">
+                        2018<br/>
+                        <span class="resultLabel">Deductions:</span>
+                        <div class="resultValue" id="deductions18"></div>
+                        <br/>
+                        <span class="resultLabel">Taxable Income:</span>
+                        <div class="resultValue" id="taxableIncome18"></div>
+                        <br/>
+                        <span class="resultLabel">Standard Tax:</span>
+                        <div class="resultValue" id="stdTax18"></div>
+                        <br/>
+                        <span class="resultLabel">AMT Liability:</span>
+                        <div class="resultValue" id="amt18"></div>
+                        <br/>
+                        <span class="resultLabel">Your Taxes:</span>
+                        <div class="resultValue" id="tax18"></div>
+                        <br/>
+                        <span class="resultLabel">Effective Rate:</span>
+                        <div class="resultValue" id="rate18"></div>
+                        <br/>
+                      </div>
+                      <div class="col-md-12" style="font-size:120%">
+                        <br/>
+                        Your total savings are: <strong><span id="savings"></span></strong>
+                      </div>
+                    </div></div>
+                  </p>
+                </div>
+              </div>
+              </div>
+            </div>
+          </div>
+          <br/>
+          <div class="alert alert-info" role="alert">
+          This site was thrown together first and foremost to play around with some of the cool services offered by AWS for creating
+          websites in the cloud.  Second, I was interested in the tax law and its impact on different people.
+          <br/><br/>Again, I am not a CPA, this is not meant for advice, and it is knowingly not 100% accurate.
+          </div>
+
+        </main>
+
+        <footer class="container">
+          <p>Disclaimer:  This site provides no guarantees to the validity of this data.  It should only be used as rought estimate of the impact of new law.</p>
+        </footer>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+
+    <script>
+      $( document ).ready(function() {
+          console.log( "ready! 0.34" );
+          $( "#subBtn" ).click(function() {
+            //alert("btn clicked");
+            wages = $("#wages").val();
+            interest = $("#interest").val();
+            stateTaxes = $("#stateTaxes").val();
+            propertyTaxes = $("#propertyTaxes").val();
+            otherDeductions = $("#otherDeductions").val();
+            married = $("#married").val();
+            postalCode = $("#postalCode").val();
+
+
+            body = {
+              married: married,
+              wages: wages,
+              homeInterest: interest,
+              propertyTaxes: propertyTaxes,
+              stateTaxes: stateTaxes,
+              otherDeductions: otherDeductions ,
+              postalCode: postalCode
+            };
+            $.ajax({
+              type: 'POST',
+              url: 'https://qpmmw74qyj.execute-api.us-east-1.amazonaws.com/prod/TaxCalculation',
+              data: JSON.stringify(body),
+              headers: { 'x-api-key':'uP7lcC3dR949ujyRG8axA4gmFo7spCNI6Pk2JQko',
+              "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
+              "Access-Control-Allow-Credentials" : true // Required for cookies, authorization headers with HTTPS
+
+               }
+            }).done(function( data ) {
+              if ( console && console.log ) {
+                console.log( "Sample of data:"+JSON.stringify(data) );
+                //{"savings":-9252.619999999999,"owedTaxes17":3140.28,"owedTaxes18":12392.9,"effectiveRate17":0.026169,
+                //"effectiveRate18":0.10327416666666667,"taxableIncome17":-272300.0,"taxableIncome18":93245.0,
+                //"stdTaxLiability17":-27230.0,"stdTaxLiability18":12392.9,"amtTaxLiability17":3140.28,
+                //"amtTaxLiability18":-3333.7200000000003,
+                //"payingAmt17":true,"payingAmt18":false,"deduction17":392300.0,"deduction18":26755.0}
+                $("#savings").html('$'+Math.round(data.savings));
+                $("#tax17").html('$'+Math.round(data.owedTaxes17));
+                $("#rate17").html(Math.round(100*data.effectiveRate17)+'%');
+                $("#amt17").html('$'+Math.round(data.amtTaxLiability17));
+                $("#deductions17").html('$'+Math.round(data.deduction17));
+                $("#taxableIncome17").html('$'+Math.round(data.taxableIncome17));
+                $("#stdTax17").html('$'+Math.round(data.stdTaxLiability17));
+
+                $("#tax18").html('$'+Math.round(data.owedTaxes18));
+                $("#rate18").html(Math.round(100*data.effectiveRate18)+'%');
+                $("#amt18").html('$'+Math.round(data.amtTaxLiability18));
+                $("#deductions18").html('$'+Math.round(data.deduction18));
+                $("#taxableIncome18").html('$'+Math.round(data.taxableIncome18));
+                $("#stdTax18").html('$'+Math.round(data.stdTaxLiability18));
+                scrollToAnchor("resAnchor");
+              }
+            });
+
+          });  //end click
+      });
+
+      function scrollToAnchor(aid){
+          var aTag = $("a[name='"+ aid +"']");
+          $('html,body').animate({scrollTop: aTag.offset().top},'slow');
+      }
+    </script>
+
+  </body>
+</html>
